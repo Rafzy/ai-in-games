@@ -5,13 +5,14 @@ from collections import deque
 
 
 class PlayerAI:
-    def __init__(self, player_id="P1", move_w=1.0, wall_w=0.4):
+    def __init__(self, player_id="P1", move_w=1.0, wall_w=0.4, send_it=True):
         self.player_id = player_id  # "P1" or "P2"
         self.opponent_id = "P2" if player_id == "P1" else "P1"
         self.move_num = 0
         self.var_depth = 2
         self.move_w = move_w
         self.wall_w = wall_w
+        self.send_it = send_it
 
     def get_move(self, game):
         legal_moves = game.get_legal_moves()
@@ -188,6 +189,9 @@ class PlayerAI:
 
         wall_score = game.walls[self.opponent_id] - game.walls[self.player_id]
 
+        if game.walls[self.player_id] <= 2 and self.send_it:
+            self.wall_w = 0
+
         return (distance_score * self.move_w) + (wall_score * self.wall_w)
 
     def is_game_over(self, game):
@@ -217,6 +221,13 @@ class PlayerAI:
                     queue.append((next_pos, distance + 1))
 
         return float("inf")
+
+    def a_star(self, game, s_pos, player):
+        if player == "P1":
+            goal = 0
+        else:
+            goal = game.board_size - 1
+        pass
 
     def get_legal_directions_from_pos(self, game, from_position):
         moves = []

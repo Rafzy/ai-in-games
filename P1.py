@@ -259,4 +259,4 @@ from test import PlayerAI
 
 class Player1AI(PlayerAI):
     def __init__(self):
-        super().__init__("P1", move_w=1.0, wall_w=0.5)
+        super().__init__("P1", send_it=True)

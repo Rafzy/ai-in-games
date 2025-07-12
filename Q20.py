@@ -399,6 +399,7 @@ class Quoridor:
 
         move = random.choice(wall_moves)
         self.update_board_wall(move)
+        # self.update_board_wall(wall_moves[5])
         self.previous_board = [
             row[:] for row in self.board
         ]  # Save the current board state

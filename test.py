@@ -1,11 +1,15 @@
 import random
+import asyncio
 import copy
 from pprint import pprint
 from collections import deque
+import time
 
 
 class PlayerAI:
-    def __init__(self, player_id="P1", move_w=1.0, wall_w=0.4, send_it=True):
+    def __init__(
+        self, player_id="P1", move_w=1.0, wall_w=0.4, send_it=True, use_timer=False
+    ):
         self.player_id = player_id  # "P1" or "P2"
         self.opponent_id = "P2" if player_id == "P1" else "P1"
         self.move_num = 0
@@ -13,6 +17,7 @@ class PlayerAI:
         self.move_w = move_w
         self.wall_w = wall_w
         self.send_it = send_it
+        self.use_timer = use_timer
 
     def get_move(self, game):
         legal_moves = game.get_legal_moves()
@@ -58,6 +63,8 @@ class PlayerAI:
                 alpha = max(alpha, score)
                 if beta <= alpha:
                     break
+
+                # TImer
 
             return (max_score, best_move)
 

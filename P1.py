@@ -5,16 +5,29 @@ from collections import deque
 
 
 class Player1AI:
+    def __init__(self):
+        self.move_num = 0
+        self.var_depth = 2
+
     def get_move(self, game):
         legal_moves = game.get_legal_moves()
         # you can retrieve information from the game object
-        # print("remaining walls", game.walls)
+        print("remaining walls", game.walls)
         # print("player_positions", game.player_positions)
         # print("board", game.board)
         # print("P1", legal_moves)
         # return ("U",)
 
-        score, best_move = self.minimax(game)
+        # self.move_num += 1
+        # if self.move_num % 10 == 0 and self.var_depth <= 4:
+        #     self.var_depth += 1
+        # print("Curr move: ", self.move_num)
+        # print("Walls remaining", game.walls)
+
+        p1_wall = game.walls["P1"]
+        p2_wall = game.walls["P2"]
+        print("Current Depth: ", self.var_depth)
+        score, best_move = self.minimax(game, depth=self.var_depth)
         return best_move
 
     def minimax(
@@ -26,7 +39,7 @@ class Player1AI:
         beta=float("inf"),
     ):
         # Reach depth
-        if depth == 0 or self.is_game_over:
+        if depth == 0 or self.is_game_over(game):
             score = self.evaluate_score(game)
             return (score, None)
 
@@ -42,7 +55,7 @@ class Player1AI:
 
             for move in legal_moves:
                 game_simulation = self.sim_move(game, move)
-                score = self.evaluate_score(game_simulation)
+                score, _ = self.minimax(game_simulation, depth - 1, False)
 
                 if score > max_score:
                     max_score = score
@@ -59,9 +72,9 @@ class Player1AI:
 
             for move in legal_moves:
                 game_simulation = self.sim_move(game, move)
-                score = self.evaluate_score(game_simulation)
+                score, move = self.minimax(game_simulation, depth - 1, True)
 
-                if score < score:
+                if score < min_score:
                     min_score = score
                     best_move = move
 
@@ -74,7 +87,7 @@ class Player1AI:
     def sim_move(self, game, move):
         game_copy = copy.deepcopy(game)
 
-        if move["0"] in ["U", "L", "D", "R"]:
+        if move[0] in ["U", "L", "D", "R"]:
             self.move(game_copy, move)
         else:
             self.apply_wall(game_copy, move)

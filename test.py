@@ -30,6 +30,7 @@ class PlayerAI:
         legal_moves = game.get_legal_moves()
         print("remaining walls", game.walls)
 
+        print(legal_moves)
         we_win = self.do_i_win(game)
         if we_win:
             return we_win
@@ -313,6 +314,8 @@ class PlayerAI:
         sim_game.ply = (sim_game.ply + 1) % 2
         opponent_id = self.opponent_id
         win_row = 0 if opponent_id == "P1" else game.board_size - 1
+
+        prev_opponent_pos = sim_game.player_positions[opponent_id]
 
         opp_moves = sim_game.get_legal_moves()
         for move in opp_moves:

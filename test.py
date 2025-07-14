@@ -22,13 +22,18 @@ class PlayerAI:
     def get_move(self, game):
         legal_moves = game.get_legal_moves()
         print("remaining walls", game.walls)
+
+        we_win = self.do_i_win(game)
+        if we_win:
+            return we_win
+
         total_wall = game.walls[self.player_id] + game.walls[self.opponent_id]
         # if total_wall <= 4:
         #     self.var_depth = 3
         print("Current Depth: ", self.var_depth)
 
-        score, best_move = self.minimax(game, depth=self.var_depth)
-        return best_move
+        # score, best_move = self.minimax(game, depth=self.var_depth)
+        # return best_move
 
     def minimax(
         self,
@@ -277,9 +282,22 @@ class PlayerAI:
 
         return moves
 
-    def initiate_suicide(self, game):
-        sim_game = copy.deepcopy(game)
-        pass
+    def do_i_win(self, game):
+        legal_moves = game.get_legal_moves()
+        my_id = self.player_id
+        goal = 0 if my_id == "P1" else game.board_size - 1
+
+        for move in legal_moves:
+            if move[0] in ["U", "D", "L", "R"]:
+                sim_game = self.sim_move(game, move)
+                pos = sim_game.player_positions[my_id]
+
+                if pos[0] == goal:
+                    return move
+
+        return None
+
+    # def chat_is_this_gg()
 
 
 # # For backward compatibility - rename your classes in P1.py and P2.py

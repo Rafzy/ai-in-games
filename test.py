@@ -10,7 +10,7 @@ class PlayerAI:
     def __init__(
         self, player_id="P1", move_w=1.0, wall_w=0.4, send_it=True, use_timer=False
     ):
-        self.player_id = player_id  # "P1" or "P2"
+        self.player_id = player_id
         self.opponent_id = "P2" if player_id == "P1" else "P1"
         self.move_num = 0
         self.var_depth = 2
@@ -26,6 +26,7 @@ class PlayerAI:
         # if total_wall <= 4:
         #     self.var_depth = 3
         print("Current Depth: ", self.var_depth)
+
         score, best_move = self.minimax(game, depth=self.var_depth)
         return best_move
 
@@ -275,6 +276,10 @@ class PlayerAI:
             moves.append(("R",))
 
         return moves
+
+    def initiate_suicide(self, game):
+        sim_game = copy.deepcopy(game)
+        pass
 
 
 # # For backward compatibility - rename your classes in P1.py and P2.py

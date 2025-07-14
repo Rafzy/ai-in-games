@@ -8,7 +8,13 @@ import time
 
 class PlayerAI:
     def __init__(
-        self, player_id="P1", move_w=1.0, wall_w=0.4, send_it=True, use_timer=False
+        self,
+        player_id="P1",
+        move_w=1.0,
+        wall_w=0.4,
+        send_it=True,
+        use_timer=False,
+        soft_ff=False,
     ):
         self.player_id = player_id
         self.opponent_id = "P2" if player_id == "P1" else "P1"
@@ -18,6 +24,7 @@ class PlayerAI:
         self.wall_w = wall_w
         self.send_it = send_it
         self.use_timer = use_timer
+        self.soft_ff = soft_ff
 
     def get_move(self, game):
         legal_moves = game.get_legal_moves()
@@ -27,13 +34,16 @@ class PlayerAI:
         if we_win:
             return we_win
 
-        total_wall = game.walls[self.player_id] + game.walls[self.opponent_id]
+        gg_chat = self.chat_is_this_gg(game)
+        if gg_chat and self.soft_ff:
+            return self.get_illegal_moves(game)
+
         # if total_wall <= 4:
         #     self.var_depth = 3
         print("Current Depth: ", self.var_depth)
 
-        # score, best_move = self.minimax(game, depth=self.var_depth)
-        # return best_move
+        score, best_move = self.minimax(game, depth=self.var_depth)
+        return best_move
 
     def minimax(
         self,
@@ -297,7 +307,44 @@ class PlayerAI:
 
         return None
 
-    # def chat_is_this_gg()
+    def chat_is_this_gg(self, game):
+        sim_game = copy.deepcopy(game)
+
+        sim_game.ply = (sim_game.ply + 1) % 2
+        opponent_id = self.opponent_id
+        win_row = 0 if opponent_id == "P1" else game.board_size - 1
+
+        opp_moves = sim_game.get_legal_moves()
+        for move in opp_moves:
+            # We only need to check movement moves
+            if move[0] in ["U", "D", "L", "R"]:
+                sim_game = self.sim_move(sim_game, move)
+                opponent_pos = sim_game.player_positions[opponent_id]
+
+                # Check if the opponent's position is on the winning row
+                if opponent_pos[0] == win_row:
+                    print(f"!!! DETECTED WINNING MOVE FOR OPPONENT: {move} !!!")
+                    return True  # A winning move was found
+
+        return False  # No winning moves were found
+
+    def get_illegal_moves(self, game):
+        moves = [("U",), ("D",), ("L",), ("R",)]
+
+        for move in moves:
+            if move not in game.get_legal_moves():
+                return move
+        for i in range(5):
+            for j in range(5):
+                wall = ("H", i, j)
+                if wall not in game.get_legal_moves():
+                    return wall
+        for i in range(5):
+            for j in range(5):
+                wall = ("V", i, j)
+                if wall not in game.get_legal_moves():
+                    return wall
+        return ("U",)
 
 
 # # For backward compatibility - rename your classes in P1.py and P2.py

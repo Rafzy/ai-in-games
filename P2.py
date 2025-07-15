@@ -86,4 +86,6 @@ from test import PlayerAI
 
 class Player2AI(PlayerAI):
     def __init__(self):
-        super().__init__("P2", send_it=False, soft_ff=True)
+        super().__init__(
+            "P2", send_it=False, soft_ff=True, deep_search=False, time_limit=5.0
+        )

@@ -15,6 +15,8 @@ class PlayerAI:
         send_it=True,
         use_timer=False,
         soft_ff=False,
+        deep_search=False,
+        time_limit=5.0,
     ):
         self.player_id = player_id
         self.opponent_id = "P2" if player_id == "P1" else "P1"
@@ -25,6 +27,8 @@ class PlayerAI:
         self.send_it = send_it
         self.use_timer = use_timer
         self.soft_ff = soft_ff
+        self.deep_search = deep_search
+        self.time_limit = time_limit
 
     def get_move(self, game):
         legal_moves = game.get_legal_moves()
@@ -40,12 +44,147 @@ class PlayerAI:
             print("Is gg")
             return self.get_illegal_moves(game)
 
-        # if total_wall <= 4:
-        #     self.var_depth = 3
-        print("Current Depth: ", self.var_depth)
+        if self.deep_search:
+            print("Using iterative deepening...")
+            score, best_move = self.iterative_deepening_minimax(game)
+        else:
+            print("Current Depth: ", self.var_depth)
+            score, best_move = self.minimax(game, depth=self.var_depth)
 
-        score, best_move = self.minimax(game, depth=self.var_depth)
         return best_move
+
+    def iterative_deepening_minimax(self, game):
+        start_time = time.time()
+        best_move = None
+        best_score = float("-inf")
+        depth = 1
+        max_depth = 10  # Safety limit to prevent infinite loops
+
+        # Get a quick move as fallback
+        legal_moves = game.get_legal_moves()
+        if legal_moves:
+            best_move = legal_moves[0]  # Fallback move
+
+        while depth <= max_depth:
+            current_time = time.time()
+            if current_time - start_time >= self.time_limit:
+                break
+
+            try:
+                print(f"Searching at depth {depth}...")
+                score, move = self.minimax_with_timeout(
+                    game, depth=depth, start_time=start_time
+                )
+
+                # Only update if we got a valid result
+                if move is not None:
+                    best_score = score
+                    best_move = move
+                else:
+                    break
+
+            except TimeoutError:
+                break
+
+            depth += 1
+
+        return best_score, best_move
+
+    def minimax_with_timeout(
+        self,
+        game,
+        depth=3,
+        maximizing_player=True,
+        alpha=float("-inf"),
+        beta=float("inf"),
+        start_time=None,
+    ):
+        # Check timeout
+        if start_time and time.time() - start_time >= self.time_limit:
+            raise TimeoutError("Search timed out")
+
+        # Reach depth or game over
+        if depth == 0 or self.is_game_over(game):
+            score = self.evaluate_score(game)
+            return (score, None)
+
+        legal_moves = game.get_legal_moves()
+        if not legal_moves:
+            print("Legal moves not found")
+            return (float("-inf"), None) if maximizing_player else (float("inf"), None)
+
+        ordered_moves = self.order_moves(game, legal_moves)
+        best_move = None
+
+        if maximizing_player:
+            max_score = float("-inf")
+
+            for move in ordered_moves:
+                # Check timeout before each move
+                if start_time and time.time() - start_time >= self.time_limit:
+                    raise TimeoutError("Search timed out")
+
+                game_simulation = self.sim_move(game, move)
+                score, _ = self.minimax_with_timeout(
+                    game_simulation, depth - 1, False, alpha, beta, start_time
+                )
+
+                if score > max_score:
+                    max_score = score
+                    best_move = move
+
+                alpha = max(alpha, score)
+                if beta <= alpha:
+                    break
+
+            return (max_score, best_move)
+
+        else:
+            min_score = float("inf")
+
+            for move in ordered_moves:
+                # Check timeout before each move
+                if start_time and time.time() - start_time >= self.time_limit:
+                    raise TimeoutError("Search timed out")
+
+                game_simulation = self.sim_move(game, move)
+                score, _ = self.minimax_with_timeout(
+                    game_simulation, depth - 1, True, alpha, beta, start_time
+                )
+
+                if score < min_score:
+                    min_score = score
+                    best_move = move
+
+                beta = min(beta, score)
+                if beta <= alpha:
+                    break
+
+            return (min_score, best_move)
+
+    def order_moves(self, game, legal_moves):
+        move_moves = []
+        wall_moves = []
+
+        for move in legal_moves:
+            if move[0] in ["U", "D", "L", "R"]:
+                move_moves.append(move)
+            else:
+                wall_moves.append(move)
+
+        my_pos = game.player_positions[self.player_id]
+        goal_row = 0 if self.player_id == "P1" else game.board_size - 1
+
+        def move_priority(move):
+            if move[0] == "U" and self.player_id == "P1":
+                return 0
+            elif move[0] == "D" and self.player_id == "P2":
+                return 0
+            else:
+                return 1
+
+        move_moves.sort(key=move_priority)
+        return move_moves + wall_moves
 
     def minimax(
         self,
@@ -81,8 +220,6 @@ class PlayerAI:
                 alpha = max(alpha, score)
                 if beta <= alpha:
                     break
-
-                # TImer
 
             return (max_score, best_move)
 

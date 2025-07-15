@@ -58,12 +58,11 @@ class PlayerAI:
         best_move = None
         best_score = float("-inf")
         depth = 1
-        max_depth = 10  # Safety limit to prevent infinite loops
+        max_depth = 10
 
-        # Get a quick move as fallback
         legal_moves = game.get_legal_moves()
         if legal_moves:
-            best_move = legal_moves[0]  # Fallback move
+            best_move = legal_moves[0]
 
         while depth <= max_depth:
             current_time = time.time()
@@ -76,7 +75,6 @@ class PlayerAI:
                     game, depth=depth, start_time=start_time
                 )
 
-                # Only update if we got a valid result
                 if move is not None:
                     best_score = score
                     best_move = move
@@ -99,11 +97,9 @@ class PlayerAI:
         beta=float("inf"),
         start_time=None,
     ):
-        # Check timeout
         if start_time and time.time() - start_time >= self.time_limit:
             raise TimeoutError("Search timed out")
 
-        # Reach depth or game over
         if depth == 0 or self.is_game_over(game):
             score = self.evaluate_score(game)
             return (score, None)
@@ -120,7 +116,6 @@ class PlayerAI:
             max_score = float("-inf")
 
             for move in ordered_moves:
-                # Check timeout before each move
                 if start_time and time.time() - start_time >= self.time_limit:
                     raise TimeoutError("Search timed out")
 
@@ -143,7 +138,6 @@ class PlayerAI:
             min_score = float("inf")
 
             for move in ordered_moves:
-                # Check timeout before each move
                 if start_time and time.time() - start_time >= self.time_limit:
                     raise TimeoutError("Search timed out")
 
@@ -194,7 +188,6 @@ class PlayerAI:
         alpha=float("-inf"),
         beta=float("inf"),
     ):
-        # Reach depth
         if depth == 0 or self.is_game_over(game):
             score = self.evaluate_score(game)
             return (score, None)

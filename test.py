@@ -228,7 +228,6 @@ class PlayerAI:
         queue = deque([(s_pos, 0)])
         visited = set([s_pos])
 
-        # Goal is different for each player
         if player == "P1":
             goal = 0
         else:
@@ -325,12 +324,11 @@ class PlayerAI:
                 sim_game_after = self.sim_move(sim_game, move)
                 opponent_pos = sim_game_after.player_positions[opponent_id]
 
-                # Check if the opponent's position is on the winning row
                 if opponent_pos[0] == win_row:
-                    print(f"!!! DETECTED WINNING MOVE FOR OPPONENT: {move} !!!")
-                    return True  # A winning move was found
+                    print("OPPONENT WINNING, INITIATE SELF EXIT FOR VALHALLA!!!!")
+                    return True
 
-        return False  # No winning moves were found
+        return False
 
     def get_illegal_moves(self, game):
         moves = [("U",), ("D",), ("L",), ("R",)]

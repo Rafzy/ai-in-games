@@ -37,6 +37,7 @@ class PlayerAI:
 
         gg_chat = self.chat_is_this_gg(game)
         if gg_chat and self.soft_ff:
+            print("Is gg")
             return self.get_illegal_moves(game)
 
         # if total_wall <= 4:
@@ -321,8 +322,8 @@ class PlayerAI:
         for move in opp_moves:
             # We only need to check movement moves
             if move[0] in ["U", "D", "L", "R"]:
-                sim_game = self.sim_move(sim_game, move)
-                opponent_pos = sim_game.player_positions[opponent_id]
+                sim_game_after = self.sim_move(sim_game, move)
+                opponent_pos = sim_game_after.player_positions[opponent_id]
 
                 # Check if the opponent's position is on the winning row
                 if opponent_pos[0] == win_row:
